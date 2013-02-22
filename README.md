@@ -6,7 +6,7 @@ npm.el makes it convenient to create new NodeJS projects within Emacs.
   * A README.md file with project title, a short installation instruction and a nice looking cat photo!
 * And opens the new package.json file.
 
-**Screencast:** [GIF](https://dl.dropbox.com/s/jnuo3m5w5x0q8vw/npmel.gif?token_hash=AAGVHEepAk106ilHMtw_Oh6S_t3GISDDnJM9Yof6eEh1LQ)
+**Screencast:** [Youtube](http://www.youtube.com/watch?v=ZmKHOaSpaJk) [GIF](https://dl.dropbox.com/s/jnuo3m5w5x0q8vw/npmel.gif?token_hash=AAGVHEepAk106ilHMtw_Oh6S_t3GISDDnJM9Yof6eEh1LQ)
 
 ### Installation
 
