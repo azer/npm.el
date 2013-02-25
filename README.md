@@ -3,6 +3,7 @@ npm.el makes it convenient to create new NodeJS projects within Emacs.
 * It asks you project name, dependencies and Git repo. Then creates;
   * A new folder and initializes Git with remotes
   * package.json, .gitignore and .npmignore files
+  * runs "npm install" command on the background.
   * A README.md file with project title, a short installation instruction and a nice looking cat photo!
 * And opens the new package.json file.
 
