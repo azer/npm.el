@@ -109,6 +109,7 @@
     (shell-command-to-string "echo 'test\ntest.js\ndocs\nexample\nexamples' > .npmignore")
     (shell-command-to-string (concat "echo '" readme "' > README.md"))
     (setq bf (get-buffer-create manifest-filename))
+    (start-process "npm" "install" "npm" "install")
     ))
 
 
