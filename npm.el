@@ -7,8 +7,10 @@
 (setq npm-vars-author (user-login-name))
 (setq npm-vars-git-user (user-login-name))
 (setq npm-vars-test-cmd "mocha")
+(setq npm-vars-nodemon-command "npm start")
 (setq npm-vars-license "BSD")
 (setq npm-vars-main "index.js")
+(setq npm-vars-new-dependency "")
 (setq npm-vars-deps "")
 (setq npm-vars-version "0.0.0")
 
@@ -49,25 +51,12 @@
     (message "ver: %S" ver)
     `(,name ,ver)))
 
-(defun npm-parse-dependency (input)
-  (let (name ver dev)
-    (setq input (split-string input " "))
-    (setq name (nth 0 input))
-    (setq ver (nth 1 input))
-    (setq dev (nth 2 input))
-    `(:name ,name :ver ,ver :dev ,(not (not dev)))))
 
-(defun npm-parse-deps (input)
-  (let (deps dev-deps)
-    (setq deps (remove-if 'is-empty (split-string input ", ")))
-    (setq deps (mapcar 'npm-parse-dependency deps))
-
-    (setq dev-deps (remove-if-not 'is-dev-dependency deps))
-    (setq deps (remove-if 'is-dev-dependency deps))
-
-    (setq deps (flatten-list (mapcar 'npm-format-dependency deps)))
-    (setq dev-deps (flatten-list (mapcar 'npm-format-dependency dev-deps)))
-    `(:dev ,dev-deps :deps ,deps)))
+(defun npm-install ()
+  "Install all dependencies"
+  (interactive)
+  (start-process "npm-install" "*Messages*" "npm" "install")
+  )
 
 (defun npm-new ()
   "Create a new NPM project"
@@ -109,9 +98,62 @@
     (shell-command-to-string "echo 'test\ntest.js\ndocs\nexample\nexamples' > .npmignore")
     (shell-command-to-string (concat "echo '" readme "' > README.md"))
     (setq bf (get-buffer-create manifest-filename))
-    (start-process "npm" "install" "npm" "install")
+    (npm-install)
     ))
 
+(defun npm-new-dependency ()
+  "Install and save new dependency"
+  (interactive)
+  (setq npm-vars-new-dependency (read-from-minibuffer "New dependency (e.g: express): " npm-vars-new-dependency))
+  (start-process "npm-install" "*Messages*" "npm" "install" "--save" npm-vars-new-dependency)
+  )
+
+(defun npm-nodemon-exec ()
+  "Run given command within nodemon. Make sure nodemon is installed as global dependency."
+  (interactive)
+  (setq npm-vars-nodemon-command (read-from-minibuffer "New dependency (e.g: express): " npm-vars-nodemon-command))
+  (compile (concat "nodemon --exec \"" npm-vars-nodemon-command "\""))
+  )
+
+(defun npm-parse-dependency (input)
+  (let (name ver dev)
+    (setq input (split-string input " "))
+    (setq name (nth 0 input))
+    (setq ver (nth 1 input))
+    (setq dev (nth 2 input))
+    `(:name ,name :ver ,ver :dev ,(not (not dev)))))
+
+(defun npm-parse-deps (input)
+  (let (deps dev-deps)
+    (setq deps (remove-if 'is-empty (split-string input ", ")))
+    (setq deps (mapcar 'npm-parse-dependency deps))
+
+    (setq dev-deps (remove-if-not 'is-dev-dependency deps))
+    (setq deps (remove-if 'is-dev-dependency deps))
+
+    (setq deps (flatten-list (mapcar 'npm-format-dependency deps)))
+    (setq dev-deps (flatten-list (mapcar 'npm-format-dependency dev-deps)))
+    `(:dev ,dev-deps :deps ,deps)))
+
+(defun npm-publish ()
+  "Publish working package on NPM"
+  (interactive)
+  (start-process "npm-publish" "*Messages*" "npm" "publish")
+  )
+
+(defun npm-test ()
+  "Run test script"
+  (interactive)
+  (compile "npm test")
+  )
+
+(defun npm-version ()
+  "Bump NPM version"
+  (interactive)
+  (let (version)
+    (setq version (read-from-minibuffer "Bump version: "))
+    (start-process "npm-version" "*Messages*" "npm" "version" version))
+  )
 
 (defun make-keyword (symbol) (intern (format ":%s" symbol)))
 (provide 'npm)
