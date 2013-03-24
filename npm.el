@@ -55,6 +55,7 @@
 (defun npm-install ()
   "Install all dependencies"
   (interactive)
+  (message "Installing dependencies...  (Check *Messages* for the output)")
   (start-process "npm-install" "*Messages*" "npm" "install")
   )
 
@@ -86,6 +87,8 @@
     (setq project-path (concat +npm-dev-dir+ "/" npm-vars-name))
     (setq manifest-filename (concat +npm-dev-dir+ "/" npm-vars-name "/package.json"))
 
+    (message "Creating the new directory and files...")
+
     (make-directory project-path)
     (setq bf (get-buffer-create manifest-filename))
     (switch-to-buffer bf)
@@ -105,6 +108,7 @@
   "Install and save new dependency"
   (interactive)
   (setq npm-vars-new-dependency (read-from-minibuffer "New dependency (e.g: express): " npm-vars-new-dependency))
+  (message (concat "Installing " npm-vars-new-dependency))
   (start-process "npm-install" "*Messages*" "npm" "install" "--save" npm-vars-new-dependency)
   )
 
@@ -138,6 +142,7 @@
 (defun npm-publish ()
   "Publish working package on NPM"
   (interactive)
+  (message "Publishing on NPM... (Check *Messages* for the output)")
   (start-process "npm-publish" "*Messages*" "npm" "publish")
   )
 
@@ -152,6 +157,7 @@
   (interactive)
   (let (version)
     (setq version (read-from-minibuffer "Bump version: "))
+    (message (concat "Bumping version to" version " (Check *Messages* for the output)"))
     (start-process "npm-version" "*Messages*" "npm" "version" version))
   )
 
