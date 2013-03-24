@@ -111,7 +111,7 @@
 (defun npm-nodemon-exec ()
   "Run given command within nodemon. Make sure nodemon is installed as global dependency."
   (interactive)
-  (setq npm-vars-nodemon-command (read-from-minibuffer "New dependency (e.g: express): " npm-vars-nodemon-command))
+  (setq npm-vars-nodemon-command (read-from-minibuffer "nodemon --exec " npm-vars-nodemon-command))
   (compile (concat "nodemon --exec \"" npm-vars-nodemon-command "\""))
   )
 
