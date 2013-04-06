@@ -12,6 +12,7 @@
 (setq npm-vars-main "index.js")
 (setq npm-vars-new-dependency "")
 (setq npm-vars-deps "")
+(setq npm-vars-last-search-keyword "")
 (setq npm-vars-version "0.0.0")
 
 (defun npm-git ()
@@ -55,8 +56,8 @@
 (defun npm-install ()
   "Install all dependencies"
   (interactive)
-  (message "Installing dependencies...  (Check *Messages* for the output)")
-  (start-process "npm-install" "*Messages*" "npm" "install")
+  (message "Installing dependencies...  (Check *npm* for the output)")
+  (start-process "npm-install" "*npm*" "npm" "install")
   )
 
 (defun npm-new ()
@@ -64,6 +65,7 @@
 
   (interactive)
   (setq npm-vars-name (read-from-minibuffer "Project Name: " npm-vars-name))
+  (setq npm-vars-desc  (read-from-minibuffer "Description: " npm-vars-desc))
   (setq npm-vars-git (read-from-minibuffer "Git: " (npm-git)))
   (setq npm-vars-deps (read-from-minibuffer "Dependencies (e.g: optimist 0.x, request 2.x, mocha * dev): " npm-vars-deps))
 
@@ -79,10 +81,10 @@
                        npm-vars-author
                        npm-vars-license))
 
-    (setq readme (concat "## " npm-vars-name "\n"
-                         npm-vars-desc "\n"
+    (setq readme (concat "## " npm-vars-name "\n\n"
+                         npm-vars-desc "\n\n"
                          "### Install\n\n```bash\n$ npm install " npm-vars-name "\n```\n\n"
-                         "![](https://dl.dropbox.com/s/9q2p5mrqnajys22/npmel.jpg?token_hash=AAHqttN9DiGl63ma8KRw-G0cdalaiMzrvrOPGnOfDslDjw)"))
+                         "![](https://dl.dropbox.com/s/9q2p5mrqnajys22/npmel.jpg)"))
 
     (setq project-path (concat +npm-dev-dir+ "/" npm-vars-name))
     (setq manifest-filename (concat +npm-dev-dir+ "/" npm-vars-name "/package.json"))
@@ -98,7 +100,7 @@
     (write-file manifest-filename)
     (shell-command-to-string (concat "git init && git remote add origin " npm-vars-git))
     (shell-command-to-string "echo 'node_modules\nnpm-debug.log' > .gitignore")
-    (shell-command-to-string "echo 'test\ntest.js\ndocs\nexample\nexamples' > .npmignore")
+    (shell-command-to-string "echo 'test\ntest.js\nexample\nexamples' > .npmignore")
     (shell-command-to-string (concat "echo '" readme "' > README.md"))
     (setq bf (get-buffer-create manifest-filename))
     (npm-install)
@@ -109,7 +111,7 @@
   (interactive)
   (setq npm-vars-new-dependency (read-from-minibuffer "New dependency (e.g: express): " npm-vars-new-dependency))
   (message (concat "Installing " npm-vars-new-dependency))
-  (start-process "npm-install" "*Messages*" "npm" "install" "--save" npm-vars-new-dependency)
+  (start-process "npm-install" "*npm*" "npm" "install" "--save" npm-vars-new-dependency)
   )
 
 (defun npm-nodemon-exec ()
@@ -139,11 +141,26 @@
     (setq dev-deps (flatten-list (mapcar 'npm-format-dependency dev-deps)))
     `(:dev ,dev-deps :deps ,deps)))
 
+(defun npm-patch ()
+  "Npm version patch"
+  (interactive)
+  (message "Bumping NPM version... (Check *npm* for the output)")
+  (start-process "npm-publish" "*npm*" "npm" "version" "patch")
+  )
+
 (defun npm-publish ()
   "Publish working package on NPM"
   (interactive)
-  (message "Publishing on NPM... (Check *Messages* for the output)")
-  (start-process "npm-publish" "*Messages*" "npm" "publish")
+  (message "Publishing on NPM... (Check *npm* for the output)")
+  (start-process "npm-publish" "*npm*" "npm" "publish")
+  )
+
+(defun npm-search ()
+  "npm search"
+  (interactive)
+  (setq npm-vars-last-search-keyword (read-from-minibuffer "Search NodeJS Modules: " npm-vars-last-search-keyword))
+  (message (concat "Searching for " npm-vars-last-search-keyword))
+  (start-process "npm-search" "*npm search*" "npm" "search" npm-vars-last-search-keyword)
   )
 
 (defun npm-test ()
@@ -157,8 +174,8 @@
   (interactive)
   (let (version)
     (setq version (read-from-minibuffer "Bump version: "))
-    (message (concat "Bumping version to" version " (Check *Messages* for the output)"))
-    (start-process "npm-version" "*Messages*" "npm" "version" version))
+    (message (concat "Bumping version to" version " (Check *npm* for the output)"))
+    (start-process "npm-version" "*npm*" "npm" "version" version))
   )
 
 (defun make-keyword (symbol) (intern (format ":%s" symbol)))
