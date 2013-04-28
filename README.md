@@ -12,11 +12,11 @@ npm.el makes it convenient to create new NodeJS projects within Emacs.
 
 **Screencast:** [Youtube](http://www.youtube.com/watch?v=ZmKHOaSpaJk) [GIF](https://dl.dropbox.com/s/jnuo3m5w5x0q8vw/npmel.gif?token_hash=AAGVHEepAk106ilHMtw_Oh6S_t3GISDDnJM9Yof6eEh1LQ)
 
-### Installation
+## Installation
 
-Require it. If you're a newbie, check out [emacs.js](http://github.com/azer/emacs.js).
+Require it. There is also [emacs.js](http://github.com/azer/emacs.js) that comes with npm.el by default.
 
-### Usage
+## Usage
 
 ```elisp
 (global-set-key (kbd "M-n i") 'npm-install)
