@@ -83,7 +83,8 @@
 
     (setq readme (concat "## " npm-vars-name "\n\n"
                          npm-vars-desc "\n\n"
-                         "### Install\n\n```bash\n$ npm install " npm-vars-name "\n```\n\n"
+                         "## Install\n\n```bash\n$ npm install " npm-vars-name "\n```\n\n"
+                         "## Usage\n\n ```js\n```\n\n"
                          "![](https://dl.dropbox.com/s/9q2p5mrqnajys22/npmel.jpg)"))
 
     (setq project-path (concat +npm-dev-dir+ "/" npm-vars-name))
