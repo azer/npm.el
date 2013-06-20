@@ -7,11 +7,11 @@
 (setq npm-vars-author (user-login-name))
 (setq npm-vars-git-user (user-login-name))
 (setq npm-vars-test-cmd "mocha")
-(setq npm-vars-nodemon-command "npm start")
 (setq npm-vars-license "BSD")
 (setq npm-vars-main "index.js")
 (setq npm-vars-new-dependency "")
 (setq npm-vars-deps "")
+(setq npm-vars-keywords "")
 (setq npm-vars-last-search-keyword "")
 (setq npm-vars-version "0.0.0")
 
@@ -25,7 +25,7 @@
 (defun is-dev-dependency (dp) (plist-get dp :dev))
 (defun is-empty (str) (string= "" str))
 
-(defun npm-package-json (name desc version main test-cmd deps git author license)
+(defun npm-package-json (name desc version main test-cmd keywords deps git author license)
   (let (dev-deps (content '()))
     (setq dev-deps (plist-get deps :dev))
     (setq deps (plist-get deps :deps))
@@ -34,6 +34,7 @@
     (plist-put content :author author)
     (plist-put content :repository `(:type "git" :url ,git))
 
+    (if (> (length keywords) 0) (plist-put content :keywords keywords))
     (if (> (length dev-deps) 0) (plist-put content :devDependencies dev-deps))
     (if (> (length deps) 0) (plist-put content :dependencies deps))
 
@@ -66,8 +67,9 @@
   (interactive)
   (setq npm-vars-name (read-from-minibuffer "Project Name: " npm-vars-name))
   (setq npm-vars-desc  (read-from-minibuffer "Description: " npm-vars-desc))
-  (setq npm-vars-git (read-from-minibuffer "Git: " (npm-git)))
+  (setq npm-vars-keywords (read-from-minibuffer "Keywords (http, parsing, etc): " npm-vars-keywords))
   (setq npm-vars-deps (read-from-minibuffer "Dependencies (e.g: optimist 0.x, request 2.x, mocha * dev): " npm-vars-deps))
+  (setq npm-vars-git (read-from-minibuffer "Git: " (npm-git)))
 
   (let (packagejson bf project-path manifest-filename readme)
     (setq packagejson (npm-package-json
@@ -76,6 +78,7 @@
                        npm-vars-version
                        npm-vars-main
                        npm-vars-test-cmd
+                       (npm-parse-keywords npm-vars-keywords)
                        (npm-parse-deps npm-vars-deps)
                        npm-vars-git
                        npm-vars-author
@@ -115,13 +118,6 @@
   (start-process "npm-install" "*npm*" "npm" "install" "--save" npm-vars-new-dependency)
   )
 
-(defun npm-nodemon-exec ()
-  "Run given command within nodemon. Make sure nodemon is installed as global dependency."
-  (interactive)
-  (setq npm-vars-nodemon-command (read-from-minibuffer "nodemon --exec " npm-vars-nodemon-command))
-  (compile (concat "nodemon --exec \"" npm-vars-nodemon-command "\""))
-  )
-
 (defun npm-parse-dependency (input)
   (let (name ver dev)
     (setq input (split-string input " "))
@@ -141,6 +137,9 @@
     (setq deps (flatten-list (mapcar 'npm-format-dependency deps)))
     (setq dev-deps (flatten-list (mapcar 'npm-format-dependency dev-deps)))
     `(:dev ,dev-deps :deps ,deps)))
+
+(defun npm-parse-keywords (input)
+  (remove-if 'is-empty (split-string input ", ")))
 
 (defun npm-patch ()
   "Npm version patch"
