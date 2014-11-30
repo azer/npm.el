@@ -6,7 +6,7 @@
 (setq npm-vars-desc "")
 (setq npm-vars-author (user-login-name))
 (setq npm-vars-git-user (user-login-name))
-(setq npm-vars-test-cmd "mocha")
+(setq npm-vars-test-cmd "node test")
 (setq npm-vars-license "BSD")
 (setq npm-vars-main "index.js")
 (setq npm-vars-new-dependency "")
@@ -68,7 +68,6 @@
   (setq npm-vars-name (read-from-minibuffer "Project Name: " npm-vars-name))
   (setq npm-vars-desc  (read-from-minibuffer "Description: " npm-vars-desc))
   (setq npm-vars-keywords (read-from-minibuffer "Keywords (http, parsing, etc): " npm-vars-keywords))
-  (setq npm-vars-deps (read-from-minibuffer "Dependencies (e.g: optimist 0.x, request 2.x, mocha * dev): " npm-vars-deps))
   (setq npm-vars-git (read-from-minibuffer "Git: " (npm-git)))
 
   (let (packagejson bf project-path manifest-filename readme)
@@ -87,8 +86,7 @@
     (setq readme (concat "## " npm-vars-name "\n\n"
                          npm-vars-desc "\n\n"
                          "## Install\n\n```bash\n$ npm install " npm-vars-name "\n```\n\n"
-                         "## Usage\n\n ```js\n```\n\n"
-                         "![](https://dl.dropbox.com/s/9q2p5mrqnajys22/npmel.jpg)"))
+                         "## Usage\n\n ```js\n```\n\n"))
 
     (setq project-path (concat +npm-dev-dir+ "/" npm-vars-name))
     (setq manifest-filename (concat +npm-dev-dir+ "/" npm-vars-name "/package.json"))
@@ -113,9 +111,17 @@
 (defun npm-new-dependency ()
   "Install and save new dependency"
   (interactive)
-  (setq npm-vars-new-dependency (read-from-minibuffer "New dependency (e.g: express): " npm-vars-new-dependency))
+  (setq npm-vars-new-dependency (read-from-minibuffer "New dependency (e.g: minimist): " npm-vars-new-dependency))
   (message (concat "Installing " npm-vars-new-dependency))
   (start-process "npm-install" "*npm*" "npm" "install" "--save" npm-vars-new-dependency)
+  )
+
+(defun npm-new-dev-dependency ()
+  "Install and save new development dependency"
+  (interactive)
+  (setq npm-vars-new-dependency (read-from-minibuffer "New dev dependency (e.g: tape): " npm-vars-new-dependency))
+  (message (concat "Installing " npm-vars-new-dependency))
+  (start-process "npm-install" "*npm*" "npm" "install" "--save-dev" npm-vars-new-dependency)
   )
 
 (defun npm-parse-dependency (input)
@@ -166,7 +172,10 @@
 (defun npm-test ()
   "Run test script"
   (interactive)
-  (compile "npm test")
+  ;;(call-process "/bin/bash" nil nil nil "-c" "npm test")
+  ;;(shell-command "npm test")
+  ;;(ansi-color-apply-on-region (point-min) (point-max))
+  (let ((compilation-save-buffers-predicate 'ignore) (compilation-ask-about-save)) (compile "npm test"))
   )
 
 (defun npm-version ()
