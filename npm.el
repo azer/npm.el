@@ -101,7 +101,7 @@
     (json-pretty-print-buffer)
     (write-file manifest-filename)
     (shell-command-to-string (concat "git init && git remote add origin " npm-vars-git))
-    (shell-command-to-string "echo 'node_modules\nnpm-debug.log' > .gitignore")
+    (shell-command-to-string "echo 'node_modules\nnpm-debug.log\n.DS_Store' > .gitignore")
     (shell-command-to-string "echo 'test\ntest.js\nexample\nexamples' > .npmignore")
     (shell-command-to-string (concat "echo '" readme "' > README.md"))
     (setq bf (get-buffer-create manifest-filename))
@@ -150,8 +150,22 @@
 (defun npm-patch ()
   "Npm version patch"
   (interactive)
-  (message "Bumping NPM version... (Check *npm* for the output)")
-  (start-process "npm-publish" "*npm*" "npm" "version" "patch")
+  (message "Releasing a patch version... (Check *npm* for the output)")
+  (start-process "npm-patch" "*npm*" "npm" "version" "patch")
+  )
+
+(defun npm-minor ()
+  "Npm version minor"
+  (interactive)
+  (message "Releasing a minor version... (Check *npm* for the output)")
+  (start-process "npm-minor" "*Messages*" "npm" "version" "minor")
+  )
+
+(defun npm-major ()
+  "Npm version major"
+  (interactive)
+  (message "Releasing a major version... (Check *npm* for the output)")
+  (start-process "npm-major" "*npm*" "npm" "version" "major")
   )
 
 (defun npm-publish ()
@@ -166,7 +180,7 @@
   (interactive)
   (setq npm-vars-last-search-keyword (read-from-minibuffer "Search NodeJS Modules: " npm-vars-last-search-keyword))
   (message (concat "Searching for " npm-vars-last-search-keyword))
-  (start-process "npm-search" "*npm search*" "npm" "search" npm-vars-last-search-keyword)
+  (start-process "npm-search" "*npm*" "npm" "search" npm-vars-last-search-keyword)
   )
 
 (defun npm-test ()
