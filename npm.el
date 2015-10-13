@@ -1,4 +1,42 @@
+;;; npm.el --- Create and manage NPM packages from Emacs
+
+;; Copyright (C) 2013  Azer Koçulu
+
+;; Author: Azer Koçulu <azer@kodfabrik.com>
+;; Keywords: tools, languages, processes
+;; Version: 0.1
+
+;; This program is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+;;; Commentary:
+
+;; All functionality is available through interactive functions.
+;;
+;; Bindings are up to you. I use:
+;;
+;; (global-set-key (kbd "M-n i") 'npm-install)
+;; (global-set-key (kbd "M-n n") 'npm-new)
+;; (global-set-key (kbd "M-n d") 'npm-new-dependency)
+;; (global-set-key (kbd "M-n e") 'npm-nodemon-exec)
+;; (global-set-key (kbd "M-n p") 'npm-publish)
+;; (global-set-key (kbd "M-n t") 'npm-test)
+;; (global-set-key (kbd "M-n v") 'npm-version)
+
+;;; Code:
+
 (require 'cl)
+(require 'json)
 
 (setq +npm-dev-dir+ "~/dev")
 
@@ -202,4 +240,7 @@
   )
 
 (defun make-keyword (symbol) (intern (format ":%s" symbol)))
+
 (provide 'npm)
+
+;;; npm.el ends here
