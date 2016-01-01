@@ -1,5 +1,3 @@
-![](https://gslb-dl.dropbox.com/s/dksrse5067riexp/npmel2.png?token_hash=AAGHelPv2DS884G414TonTSlsGHAJ4MRy6r3-om4tNjxNw)
-
 npm.el makes it convenient to create new NodeJS projects within Emacs.
 
 * It asks you project name, dependencies and Git repo. Then creates;
