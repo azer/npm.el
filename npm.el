@@ -1,4 +1,5 @@
 (require 'cl)
+(require 'compile)
 
 (setq +npm-dev-dir+ "~/dev")
 
@@ -200,6 +201,49 @@
     (message (concat "Bumping version to" version " (Check *npm* for the output)"))
     (start-process "npm-version" "*npm*" "npm" "version" version))
   )
+
+(defvar npm-node-error-regexp
+  "^[  ]+at \\(?:[^\(\n]+ \(\\)?\\([a-zA-Z\.0-9_/-]+\\):\\([0-9]+\\):\\([0-9]+\\)\)?$"
+  "Regular expression to match NodeJS errors.
+From http://benhollis.net/blog/2015/12/20/nodejs-stack-traces-in-emacs-compilation-mode/")
+
+(defvar npm-node-error-regexp-alist
+  `((,npm-node-error-regexp 1 2 3)))
+
+(defun npm-compilation-filter ()
+  "Filter function for compilation output."
+  (ansi-color-apply-on-region compilation-filter-start (point-max)))
+
+(define-compilation-mode npm-compilation-mode "Npm"
+  "Npm compilation mode."
+  (progn
+    (set (make-local-variable 'compilation-error-regexp-alist) npm-node-error-regexp-alist)
+    (add-hook 'compilation-filter-hook 'npm-compilation-filter nil t)
+  ))
+
+(defun npm-parse-scripts (raw-scripts)
+  "Parse the output of the `npm run` command in RAW-SCRIPTS into a list of scripts."
+  (delq nil
+        (mapcar (lambda (script-line)
+                  (when (string-match-p "^  \\w" script-line)
+                    (string-trim script-line)))
+                raw-scripts)))
+
+;;;###autoload
+(defun npm-run ()
+  "Run an npm script from the provided list."
+  (interactive)
+  (save-some-buffers (not compilation-ask-about-save)
+                     (when (boundp 'compilation-save-buffers-predicate)
+                       compilation-save-buffers-predicate))
+  (let ((scripts (npm-parse-scripts (process-lines "npm" "run"))) (buffer-name "*npm run*"))
+    (when (get-buffer buffer-name)
+      (kill-buffer buffer-name))
+    (let ((script (concat "npm run "
+                          (ido-completing-read "Select script to run: " scripts))))
+      (with-current-buffer (get-buffer-create buffer-name)
+        (compilation-start script 'npm-compilation-mode (lambda (m) (buffer-name)))))))
+
 
 (defun make-keyword (symbol) (intern (format ":%s" symbol)))
 (provide 'npm)
