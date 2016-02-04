@@ -184,15 +184,6 @@
   (start-process "npm-search" "*npm*" "npm" "search" npm-vars-last-search-keyword)
   )
 
-(defun npm-test ()
-  "Run test script"
-  (interactive)
-  ;;(call-process "/bin/bash" nil nil nil "-c" "npm test")
-  ;;(shell-command "npm test")
-  ;;(ansi-color-apply-on-region (point-min) (point-max))
-  (let ((compilation-save-buffers-predicate 'ignore) (compilation-ask-about-save)) (compile "npm test"))
-  )
-
 (defun npm-version ()
   "Bump NPM version"
   (interactive)
@@ -201,6 +192,11 @@
     (message (concat "Bumping version to" version " (Check *npm* for the output)"))
     (start-process "npm-version" "*npm*" "npm" "version" version))
   )
+
+(defun npm-test ()
+  "Run test script"
+  (interactive)
+  (npm-run "test"))
 
 (defvar npm-node-error-regexp
   "^[  ]+at \\(?:[^\(\n]+ \(\\)?\\([a-zA-Z\.0-9_/-]+\\):\\([0-9]+\\):\\([0-9]+\\)\)?$"
@@ -230,8 +226,10 @@ From http://benhollis.net/blog/2015/12/20/nodejs-stack-traces-in-emacs-compilati
                 raw-scripts)))
 
 ;;;###autoload
-(defun npm-run ()
-  "Run an npm script from the provided list."
+(defun npm-run (&optional script)
+  "Run an npm script.
+
+SCRIPT can be passed in or selected from a list of scripts configured in a package.json"
   (interactive)
   (save-some-buffers (not compilation-ask-about-save)
                      (when (boundp 'compilation-save-buffers-predicate)
@@ -240,7 +238,7 @@ From http://benhollis.net/blog/2015/12/20/nodejs-stack-traces-in-emacs-compilati
     (when (get-buffer buffer-name)
       (kill-buffer buffer-name))
     (let ((script (concat "npm run "
-                          (ido-completing-read "Select script to run: " scripts))))
+                          (or script (ido-completing-read "Select script to run: " scripts)))))
       (with-current-buffer (get-buffer-create buffer-name)
         (compilation-start script 'npm-compilation-mode (lambda (m) (buffer-name)))))))
 
