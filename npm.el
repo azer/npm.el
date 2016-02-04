@@ -1,4 +1,5 @@
 (require 'cl)
+(require 'compile)
 
 (setq +npm-dev-dir+ "~/dev")
 
@@ -183,15 +184,6 @@
   (start-process "npm-search" "*npm*" "npm" "search" npm-vars-last-search-keyword)
   )
 
-(defun npm-test ()
-  "Run test script"
-  (interactive)
-  ;;(call-process "/bin/bash" nil nil nil "-c" "npm test")
-  ;;(shell-command "npm test")
-  ;;(ansi-color-apply-on-region (point-min) (point-max))
-  (let ((compilation-save-buffers-predicate 'ignore) (compilation-ask-about-save)) (compile "npm test"))
-  )
-
 (defun npm-version ()
   "Bump NPM version"
   (interactive)
@@ -200,6 +192,56 @@
     (message (concat "Bumping version to" version " (Check *npm* for the output)"))
     (start-process "npm-version" "*npm*" "npm" "version" version))
   )
+
+(defun npm-test ()
+  "Run test script"
+  (interactive)
+  (npm-run "test"))
+
+(defvar npm-node-error-regexp
+  "^[  ]+at \\(?:[^\(\n]+ \(\\)?\\([a-zA-Z\.0-9_/-]+\\):\\([0-9]+\\):\\([0-9]+\\)\)?$"
+  "Regular expression to match NodeJS errors.
+From http://benhollis.net/blog/2015/12/20/nodejs-stack-traces-in-emacs-compilation-mode/")
+
+(defvar npm-node-error-regexp-alist
+  `((,npm-node-error-regexp 1 2 3)))
+
+(defun npm-compilation-filter ()
+  "Filter function for compilation output."
+  (ansi-color-apply-on-region compilation-filter-start (point-max)))
+
+(define-compilation-mode npm-compilation-mode "Npm"
+  "Npm compilation mode."
+  (progn
+    (set (make-local-variable 'compilation-error-regexp-alist) npm-node-error-regexp-alist)
+    (add-hook 'compilation-filter-hook 'npm-compilation-filter nil t)
+  ))
+
+(defun npm-parse-scripts (raw-scripts)
+  "Parse the output of the `npm run` command in RAW-SCRIPTS into a list of scripts."
+  (delq nil
+        (mapcar (lambda (script-line)
+                  (when (string-match-p "^  \\w" script-line)
+                    (string-trim script-line)))
+                raw-scripts)))
+
+;;;###autoload
+(defun npm-run (&optional script)
+  "Run an npm script.
+
+SCRIPT can be passed in or selected from a list of scripts configured in a package.json"
+  (interactive)
+  (save-some-buffers (not compilation-ask-about-save)
+                     (when (boundp 'compilation-save-buffers-predicate)
+                       compilation-save-buffers-predicate))
+  (let ((scripts (npm-parse-scripts (process-lines "npm" "run"))) (buffer-name "*npm run*"))
+    (when (get-buffer buffer-name)
+      (kill-buffer buffer-name))
+    (let ((script (concat "npm run "
+                          (or script (ido-completing-read "Select script to run: " scripts)))))
+      (with-current-buffer (get-buffer-create buffer-name)
+        (compilation-start script 'npm-compilation-mode (lambda (m) (buffer-name)))))))
+
 
 (defun make-keyword (symbol) (intern (format ":%s" symbol)))
 (provide 'npm)
