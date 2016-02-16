@@ -1,6 +1,17 @@
 (require 'cl)
 (require 'compile)
 
+(defgroup npm nil
+  "Run npm in Emacs"
+  :group 'tools)
+
+(defcustom npm-executable-path nil
+  "The path to the node and npm executables.
+
+NIL if they should be looked up from the global path"
+  :type 'string
+  :group 'npm)
+
 (setq +npm-dev-dir+ "~/dev")
 
 (setq npm-vars-name "hello-world")
@@ -16,6 +27,21 @@
 (setq npm-vars-last-search-keyword "")
 (setq npm-vars-version "0.0.0")
 
+(defun npm-exec-with-path (callback &rest args)
+  "Execute CALLBACK with the path set to NPM_EXECUTABLE_PATH."
+  (let* ((old-path (getenv "PATH"))
+        (old-exec-path exec-path)
+        (old-compilation-environment compilation-environment)
+        (npm-path (concat npm-executable-path ":" old-path)))
+    (when npm-executable-path
+      (setenv "PATH" npm-path)
+      (setq exec-path (cons npm-executable-path exec-path))
+      (setq compilation-environment (cons (concat "PATH=" npm-path) compilation-environment)))
+    (apply callback args)
+    (setenv "PATH" old-path)
+    (setq exec-path old-exec-path)
+    (setq compilation-environment old-compilation-environment)))
+
 (defun npm-git ()
   (concat "git@github.com:" npm-vars-git-user "/" npm-vars-name ".git"))
 
@@ -24,7 +50,10 @@
 (defun flatten-list (list) (apply #'nconc list))
 
 (defun is-dev-dependency (dp) (plist-get dp :dev))
+
 (defun is-empty (str) (string= "" str))
+
+(defun make-keyword (symbol) (intern (format ":%s" symbol)))
 
 (defun npm-package-json (name desc version main test-cmd keywords deps git author license)
   (let (dev-deps (content '()))
@@ -59,7 +88,7 @@
   "Install all dependencies"
   (interactive)
   (message "Installing dependencies...  (Check *npm* for the output)")
-  (start-process "npm-install" "*npm*" "npm" "install")
+  (npm-exec-with-path 'start-process "npm-install" "*npm*" "npm" "install")
   )
 
 (defun npm-new ()
@@ -114,7 +143,7 @@
   (interactive)
   (setq npm-vars-new-dependency (read-from-minibuffer "New dependency (e.g: minimist): " npm-vars-new-dependency))
   (message (concat "Installing " npm-vars-new-dependency))
-  (start-process "npm-install" "*npm*" "npm" "install" "--save" npm-vars-new-dependency)
+  (npm-exec-with-path 'start-process "npm-install" "*npm*" "npm" "install" "--save" npm-vars-new-dependency)
   )
 
 (defun npm-new-dev-dependency ()
@@ -122,7 +151,7 @@
   (interactive)
   (setq npm-vars-new-dependency (read-from-minibuffer "New dev dependency (e.g: tape): " npm-vars-new-dependency))
   (message (concat "Installing " npm-vars-new-dependency))
-  (start-process "npm-install" "*npm*" "npm" "install" "--save-dev" npm-vars-new-dependency)
+  (npm-exec-with-path 'start-process "npm-install" "*npm*" "npm" "install" "--save-dev" npm-vars-new-dependency)
   )
 
 (defun npm-parse-dependency (input)
@@ -152,28 +181,28 @@
   "Npm version patch"
   (interactive)
   (message "Releasing a patch version... (Check *npm* for the output)")
-  (start-process "npm-patch" "*npm*" "npm" "version" "patch")
+  (npm-exec-with-path 'start-process "npm-patch" "*npm*" "npm" "version" "patch")
   )
 
 (defun npm-minor ()
   "Npm version minor"
   (interactive)
   (message "Releasing a minor version... (Check *npm* for the output)")
-  (start-process "npm-minor" "*Messages*" "npm" "version" "minor")
+  (npm-exec-with-path 'start-process "npm-minor" "*Messages*" "npm" "version" "minor")
   )
 
 (defun npm-major ()
   "Npm version major"
   (interactive)
   (message "Releasing a major version... (Check *npm* for the output)")
-  (start-process "npm-major" "*npm*" "npm" "version" "major")
+  (npm-exec-with-path 'start-process "npm-major" "*npm*" "npm" "version" "major")
   )
 
 (defun npm-publish ()
   "Publish working package on NPM"
   (interactive)
   (message "Publishing on NPM... (Check *npm* for the output)")
-  (start-process "npm-publish" "*npm*" "npm" "publish")
+  (npm-exec-with-path 'start-process "npm-publish" "*npm*" "npm" "publish")
   )
 
 (defun npm-search ()
@@ -181,7 +210,7 @@
   (interactive)
   (setq npm-vars-last-search-keyword (read-from-minibuffer "Search NodeJS Modules: " npm-vars-last-search-keyword))
   (message (concat "Searching for " npm-vars-last-search-keyword))
-  (start-process "npm-search" "*npm*" "npm" "search" npm-vars-last-search-keyword)
+  (npm-exec-with-path 'start-process "npm-search" "*npm*" "npm" "search" npm-vars-last-search-keyword)
   )
 
 (defun npm-version ()
@@ -190,7 +219,7 @@
   (let (version)
     (setq version (read-from-minibuffer "Bump version: "))
     (message (concat "Bumping version to" version " (Check *npm* for the output)"))
-    (start-process "npm-version" "*npm*" "npm" "version" version))
+    (npm-exec-with-path 'start-process "npm-version" "*npm*" "npm" "version" version))
   )
 
 (defun npm-test ()
@@ -240,8 +269,7 @@ SCRIPT can be passed in or selected from a list of scripts configured in a packa
     (let ((script (concat "npm run "
                           (or script (ido-completing-read "Select script to run: " scripts)))))
       (with-current-buffer (get-buffer-create buffer-name)
-        (compilation-start script 'npm-compilation-mode (lambda (m) (buffer-name)))))))
+        (npm-exec-with-path 'compilation-start script 'npm-compilation-mode (lambda (m) (buffer-name)))))))
 
 
-(defun make-keyword (symbol) (intern (format ":%s" symbol)))
 (provide 'npm)
