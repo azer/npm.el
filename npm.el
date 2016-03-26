@@ -1,3 +1,27 @@
+;;; npm.el --- Create and rule NPM packages from Emacs
+
+;; Author: Azer Koçulu
+;; Keywords: languages, javascript, convenience
+;; Package-Requires: ((emacs "24.1"))
+
+;; This file is NOT part of GNU Emacs.
+
+;;; Commentary:
+
+;; npm.el makes it convenient to create new NodeJS projects within Emacs.
+
+;; It asks you project name, dependencies and Git repo.  Then creates;
+
+;; - A new folder and initializes Git with remotes
+;; - package.json, .gitignore and .npmignore files
+;; - runs "npm install" command on the background.
+;; - A README.md file with project title, a short installation
+;;   instruction and a nice looking cat photo!
+;; - Opens the new package.json file.
+;; - And comes with some very useful bindings like install, publish, test etc
+
+;;; Code:
+
 (require 'cl)
 (require 'compile)
 
@@ -273,3 +297,5 @@ SCRIPT can be passed in or selected from a list of scripts configured in a packa
 
 
 (provide 'npm)
+
+;;; npm.el ends here
