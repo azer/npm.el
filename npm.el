@@ -8,7 +8,7 @@
 
 ;;; Commentary:
 
-;; npm.el makes it convenient to create new NodeJS projects within Emacs.
+;; npm.el makes it convenient to create new npm projects within Emacs.
 
 ;; It asks you project name, dependencies and Git repo.  Then creates;
 
