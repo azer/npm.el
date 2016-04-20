@@ -22,41 +22,47 @@
 
 ;;; Code:
 
-(require 'cl)
+(eval-when-compile
+  (require 'cl))
 (require 'compile)
+(require 'json)
 
 (defgroup npm nil
-  "Run npm in Emacs"
+  "Run npm in Emacs."
   :group 'tools)
 
 (defcustom npm-executable-path nil
-  "The path to the node and npm executables.
+  "The path to the `node' and `npm' executables.
 
-NIL if they should be looked up from the global path"
+If nil, npm.el shall look up from the global path."
   :type 'string
   :group 'npm)
 
-(setq +npm-dev-dir+ "~/dev")
+(defcustom npm-dev-dir "~/dev"
+  "The path where npm will create new packages."
+  :type 'string
+  :group 'npm)
 
-(setq npm-vars-name "hello-world")
-(setq npm-vars-desc "")
-(setq npm-vars-author (user-login-name))
-(setq npm-vars-git-user (user-login-name))
-(setq npm-vars-test-cmd "node test")
-(setq npm-vars-license "BSD")
-(setq npm-vars-main "index.js")
-(setq npm-vars-new-dependency "")
-(setq npm-vars-deps "")
-(setq npm-vars-keywords "")
-(setq npm-vars-last-search-keyword "")
-(setq npm-vars-version "0.0.0")
+(defvar npm-vars-name "hello-world")
+(defvar npm-vars-desc "")
+(defvar npm-vars-author (user-login-name))
+(defvar npm-vars-git-user (user-login-name))
+(defvar npm-vars-test-cmd "node test")
+(defvar npm-vars-license "BSD-3-Clause")
+(defvar npm-vars-main "index.js")
+(defvar npm-vars-new-dependency "")
+(defvar npm-vars-deps "")
+(defvar npm-vars-keywords "")
+(defvar npm-vars-last-search-keyword "")
+(defvar npm-vars-version "0.0.0")
+(defvar npm-vars-git "")
 
 (defun npm-exec-with-path (callback &rest args)
-  "Execute CALLBACK with the path set to NPM_EXECUTABLE_PATH."
+  "Execute CALLBACK with path set to NPM_EXECUTABLE_PATH, with optional ARGS."
   (let* ((old-path (getenv "PATH"))
-        (old-exec-path exec-path)
-        (old-compilation-environment compilation-environment)
-        (npm-path (concat npm-executable-path ":" old-path)))
+         (old-exec-path exec-path)
+         (old-compilation-environment compilation-environment)
+         (npm-path (concat npm-executable-path ":" old-path)))
     (when npm-executable-path
       (setenv "PATH" npm-path)
       (setq exec-path (cons npm-executable-path exec-path))
@@ -67,6 +73,7 @@ NIL if they should be looked up from the global path"
     (setq compilation-environment old-compilation-environment)))
 
 (defun npm-git ()
+  "Create a Git URL from `npm-vars-git-user' and `npm-vars-name'."
   (concat "git@github.com:" npm-vars-git-user "/" npm-vars-name ".git"))
 
 (setq json-encoding-pretty-print t)
@@ -81,6 +88,20 @@ NIL if they should be looked up from the global path"
 
 (defun npm-package-json (name desc version main test-cmd keywords deps git author license)
   (let (dev-deps (content '()))
+  "Encode npm package info to JSON.
+
+The NPM package info should contain the following:
+
+NAME     - The name of the package.
+DESC     - A short package description.
+VERSION  - The initial version number.
+MAIN     - Main script file name.
+TEST-CMD - Test command.
+KEYWORDS - Descriptive keywords.
+DEPS     - Dependencies, if any.
+GIT      - Remote Git repository.
+AUTHOR   - Author's name and/or email.
+LICENSE  - License this package is released under."
     (setq dev-deps (plist-get deps :dev))
     (setq deps (plist-get deps :deps))
 
@@ -102,6 +123,7 @@ NIL if they should be looked up from the global path"
 
 (defun npm-format-dependency (dp)
   (let (name ver)
+  "Format NPM dependency DP."
     (setq name (make-keyword (plist-get dp :name)))
     (setq ver (plist-get dp :ver))
     (message "ver: %S" ver)
@@ -109,14 +131,14 @@ NIL if they should be looked up from the global path"
 
 
 (defun npm-install ()
-  "Install all dependencies"
+  "Install all NPM dependencies."
   (interactive)
   (message "Installing dependencies...  (Check *npm* for the output)")
   (npm-exec-with-path 'start-process "npm-install" "*npm*" "npm" "install")
   )
 
 (defun npm-new ()
-  "Create a new NPM project"
+  "Create a new NPM project."
 
   (interactive)
   (setq npm-vars-name (read-from-minibuffer "Project Name: " npm-vars-name))
@@ -142,8 +164,8 @@ NIL if they should be looked up from the global path"
                          "## Install\n\n```bash\n$ npm install " npm-vars-name "\n```\n\n"
                          "## Usage\n\n ```js\n```\n\n"))
 
-    (setq project-path (concat +npm-dev-dir+ "/" npm-vars-name))
-    (setq manifest-filename (concat +npm-dev-dir+ "/" npm-vars-name "/package.json"))
+    (setq project-path (concat npm-dev-dir "/" npm-vars-name))
+    (setq manifest-filename (concat npm-dev-dir "/" npm-vars-name "/package.json"))
 
     (message "Creating the new directory and files...")
 
