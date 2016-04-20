@@ -59,9 +59,9 @@ If nil, npm.el shall look up from the global path."
 (defun npm-exec-with-path (callback &rest args)
   "Execute CALLBACK with path set to NPM_EXECUTABLE_PATH, with optional ARGS."
   (let* ((old-path (getenv "PATH"))
-        (old-exec-path exec-path)
-        (old-compilation-environment compilation-environment)
-        (npm-path (concat npm-executable-path ":" old-path)))
+         (old-exec-path exec-path)
+         (old-compilation-environment compilation-environment)
+         (npm-path (concat npm-executable-path ":" old-path)))
     (when npm-executable-path
       (setenv "PATH" npm-path)
       (setq exec-path (cons npm-executable-path exec-path))
