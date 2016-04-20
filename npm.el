@@ -25,6 +25,7 @@
 (eval-when-compile
   (require 'cl))
 (require 'compile)
+(require 'json)
 
 (defgroup npm nil
   "Run npm in Emacs."
