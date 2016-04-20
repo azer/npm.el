@@ -22,7 +22,8 @@
 
 ;;; Code:
 
-(require 'cl)
+(eval-when-compile
+  (require 'cl))
 (require 'compile)
 
 (defgroup npm nil
