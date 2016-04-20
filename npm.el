@@ -36,20 +36,24 @@ NIL if they should be looked up from the global path"
   :type 'string
   :group 'npm)
 
-(setq +npm-dev-dir+ "~/dev")
+(defcustom npm-dev-dir "~/dev"
+  "The path where npm will create new packages."
+  :type 'string
+  :group 'npm)
 
-(setq npm-vars-name "hello-world")
-(setq npm-vars-desc "")
-(setq npm-vars-author (user-login-name))
-(setq npm-vars-git-user (user-login-name))
-(setq npm-vars-test-cmd "node test")
-(setq npm-vars-license "BSD")
-(setq npm-vars-main "index.js")
-(setq npm-vars-new-dependency "")
-(setq npm-vars-deps "")
-(setq npm-vars-keywords "")
-(setq npm-vars-last-search-keyword "")
-(setq npm-vars-version "0.0.0")
+(defvar npm-vars-name "hello-world")
+(defvar npm-vars-desc "")
+(defvar npm-vars-author (user-login-name))
+(defvar npm-vars-git-user (user-login-name))
+(defvar npm-vars-test-cmd "node test")
+(defvar npm-vars-license "BSD-3-Clause")
+(defvar npm-vars-main "index.js")
+(defvar npm-vars-new-dependency "")
+(defvar npm-vars-deps "")
+(defvar npm-vars-keywords "")
+(defvar npm-vars-last-search-keyword "")
+(defvar npm-vars-version "0.0.0")
+(defvar npm-vars-git "")
 
 (defun npm-exec-with-path (callback &rest args)
   "Execute CALLBACK with the path set to NPM_EXECUTABLE_PATH."
