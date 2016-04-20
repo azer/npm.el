@@ -163,8 +163,8 @@ LICENSE  - License this package is released under."
                          "## Install\n\n```bash\n$ npm install " npm-vars-name "\n```\n\n"
                          "## Usage\n\n ```js\n```\n\n"))
 
-    (setq project-path (concat +npm-dev-dir+ "/" npm-vars-name))
-    (setq manifest-filename (concat +npm-dev-dir+ "/" npm-vars-name "/package.json"))
+    (setq project-path (concat npm-dev-dir "/" npm-vars-name))
+    (setq manifest-filename (concat npm-dev-dir "/" npm-vars-name "/package.json"))
 
     (message "Creating the new directory and files...")
 
